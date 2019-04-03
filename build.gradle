@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+}
+
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'idea'
+apply plugin: 'antlr'
+
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main.java.srcDirs += "${project.buildDir}/generated-src/antlr/main"
+}
+
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-long-messages", "-package", "hackscript.antlr"]
+    outputDirectory = file("${project.buildDir}/generated-src/antlr/main/hackscript/antlr")
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile 'org.apache.commons:commons-lang3:3.8.1'
+    compile 'com.github.pcj:google-options:1.0.0'
+    antlr "org.antlr:antlr4:4.7.2"
+}
