@@ -27,8 +27,8 @@ public class FunctionDeclaration extends ArrayList<VariableDeclaration> implemen
     private boolean pointer;
     private String identifier;
     private CompoundStatement body;
-    private boolean isCoroutined = false;
     private SymbolTable scope = new SymbolTable();
+    private int location;
 
     /**
      * Sets whether or not this function returns a pointer
@@ -78,25 +78,6 @@ public class FunctionDeclaration extends ArrayList<VariableDeclaration> implemen
         return super.add(parameter);
     }
 
-    /**
-     * Gets whether this function is called as a coroutine or not
-     *
-     * @return Whether or not this function is called as a coroutine
-     */
-    public boolean isCoroutined() {
-        return isCoroutined;
-    }
-
-    /**
-     * Sets whether this function is called as a coroutine or not
-     *
-     * @param coroutine Whether or not this function is called as a coroutine
-     */
-    public void setCoroutined(boolean coroutine) {
-        this.isCoroutined = coroutine;
-    }
-
-
     @Override
     public void setSpecifiers(DeclarationSpecifierList specifiers) {
         this.specifiers = specifiers;
@@ -110,6 +91,16 @@ public class FunctionDeclaration extends ArrayList<VariableDeclaration> implemen
     @Override
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    @Override
+    public void setLocation(int location) {
+        this.location = location;
+    }
+
+    @Override
+    public int getLocation() {
+        return location;
     }
 
     @Override

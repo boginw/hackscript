@@ -103,6 +103,16 @@ public class FunctionExpression implements Expression, Identifier, HasDefinition
   }
 
   @Override
+  public void setLocation(int location) {
+    definition.setLocation(location);
+  }
+
+  @Override
+  public int getLocation() {
+    return definition.getLocation();
+  }
+
+  @Override
   public String toString() {
     return identifier;
   }

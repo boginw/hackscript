@@ -77,6 +77,16 @@ public class VariableExpression implements LeftHandSideExpression, Identifier, H
     }
 
     @Override
+    public void setLocation(int location) {
+        definition.setLocation(location);
+    }
+
+    @Override
+    public int getLocation() {
+        return definition.getLocation();
+    }
+
+    @Override
     public VariableDeclaration getDefinition() {
         return this.definition;
     }

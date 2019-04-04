@@ -3,6 +3,7 @@ package lang.nodes.expressions.binary.logical;
 
 import hackscript.antlr.HackScriptParser.RelationalExpressionContext;
 import hackscript.antlr.HackScriptParser.EqualityExpressionContext;
+import lang.nodes.expressions.CanSetOperator;
 import lang.visitors.CSTVisitor;
 import lang.Node;
 import lang.nodes.Expression;
@@ -12,11 +13,18 @@ import org.antlr.v4.runtime.ParserRuleContext;
 /**
  * This class represents an expression of the form 1 == 1
  */
-public class LogicalEqualityExpression extends LogicalExpression {
+public class LogicalEqualityExpression extends LogicalExpression implements CanSetOperator {
+
+  private String operator;
 
   @Override
   public String getOperator() {
-    return "==";
+    return operator;
+  }
+
+  @Override
+  public void setOperator(String operator) {
+    this.operator = operator;
   }
 
   @Override
@@ -29,7 +37,9 @@ public class LogicalEqualityExpression extends LogicalExpression {
 
     setFirstOperand((Expression) visitor.visit(ctx.getChild(0)));
     setSecondOperand((Expression) visitor.visit(ctx.getChild(2)));
+    setOperator(ctx.getChild(1).getText());
     return this;
   }
+
 
 }

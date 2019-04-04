@@ -1,0 +1,9 @@
+// Try with memory cells 72,101,108,108,111,32,87,111,114,108,100,33
+void main() {
+    int i = 0;
+
+    while (*i != 0) {
+        pprint(*i);
+        i++;
+    }
+}

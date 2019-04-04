@@ -39,7 +39,7 @@ public class BoolLiteral implements LiteralExpression<Boolean> {
     @Override
     public Node parse(ParserRuleContext ctx, CSTVisitor visitor) {
         PrimaryExpressionContext actx = Node.checkContext(ctx, PrimaryExpressionContext.class);
-        setValue(actx.BoolLiteral().getChild(0).toString().equals("true"));
+        setValue(actx.getChild(0).toString().equals("true"));
 
         return this;
     }

@@ -28,153 +28,157 @@ import lang.nodes.statements.jump.ReturnStatement;
 import lang.nodes.statements.selection.IfStatement;
 import lang.nodes.statements.selection.WhileStatement;
 
-public interface Visitor {
+public interface Visitor<T> {
 
     // Nodes
-    void visit(Node node);
+    T visit(Node node);
 
     // Expressions
-    void visit(Expression expression);
+    T visit(Expression expression);
 
     // Literals
-    void visit(BoolLiteral boolLiteral);
+    T visit(BoolLiteral boolLiteral);
 
-    void visit(IntLiteral intLiteral);
+    T visit(IntLiteral intLiteral);
 
-    void visit(CharLiteral charLiteral);
+    T visit(CharLiteral charLiteral);
 
     // Unary
-    void visit(UnaryExpression expression);
+    T visit(UnaryExpression expression);
 
-    void visit(AdditivePrefixExpression expression);
+    T visit(AdditivePrefixExpression expression);
 
-    void visit(AddressOfExpression addressOfExpression);
+    T visit(AddressOfExpression addressOfExpression);
 
-    void visit(CastExpression expression);
+    T visit(CastExpression expression);
 
-    void visit(FunctionExpression expression);
+    T visit(FunctionExpression expression);
 
-    void visit(IncrementDecrementExpression expression);
+    T visit(IncrementDecrementExpression expression);
 
-    void visit(NegationExpression expression);
+    T visit(NegationExpression expression);
 
     // Binary Expressions
-    void visit(BinaryExpression binaryExpression);
+    T visit(BinaryExpression binaryExpression);
 
-    void visit(AdditiveExpression additiveExpression);
+    T visit(AdditiveExpression additiveExpression);
 
-    void visit(MultiplicativeExpression multiplicativeExpression);
+    T visit(MultiplicativeExpression multiplicativeExpression);
 
-    void visit(LogicalRelantionalExpression logicalRelantionalExpression);
+    T visit(LogicalRelantionalExpression logicalRelantionalExpression);
 
-    void visit(LogicalAndExpression logicalAndExpression);
+    T visit(LogicalAndExpression logicalAndExpression);
 
-    void visit(LogicalEqualityExpression logicalEqualityExpression);
+    T visit(LogicalEqualityExpression logicalEqualityExpression);
 
-    void visit(LogicalOrExpression logicalOrExpression);
+    T visit(LogicalOrExpression logicalOrExpression);
 
-    void visit(AssignmentExpression assignmentExpression);
+    T visit(AssignmentExpression assignmentExpression);
 
     // LHS Expressions
-    void visit(ArrayExpression expression);
+    T visit(ArrayExpression expression);
 
-    void visit(DereferenceExpression expression);
+    T visit(DereferenceExpression expression);
 
-    void visit(VariableExpression variableExpression);
+    T visit(VariableExpression variableExpression);
 
     // Other expressions
-    void visit(InitializerList initializerList);
+    T visit(InitializerList initializerList);
 
     // Statements
-    void visit(Statement statement);
+    T visit(Statement statement);
 
     // Jump statements
-    void visit(BreakStatement breakStatement);
+    T visit(BreakStatement breakStatement);
 
-    void visit(ContinueStatement continueStatement);
+    T visit(ContinueStatement continueStatement);
 
-    void visit(ReturnStatement returnStatement);
+    T visit(ReturnStatement returnStatement);
 
     // Iteration / Selection Statements
-    void visit(IfStatement ifStatement);
+    T visit(IfStatement ifStatement);
 
-    void visit(WhileStatement whileStatement);
+    T visit(WhileStatement whileStatement);
 
     // Other statements
-    void visit(CompoundStatement compoundStatement);
+    T visit(CompoundStatement compoundStatement);
 
-    void visit(ExpressionStatement expressionStatement);
+    T visit(ExpressionStatement expressionStatement);
 
-    void visit(VariableDeclaration variableDeclaration);
+    T visit(VariableDeclaration variableDeclaration);
 
-    void visit(RawStatement rawStatement);
+    T visit(RawStatement rawStatement);
 
     // MISC
-    void visit(ArgumentExpressionList expressionList);
+    T visit(ArgumentExpressionList expressionList);
 
-    void visit(DeclarationSpecifierList declarationSpecifierList);
+    T visit(DeclarationSpecifierList declarationSpecifierList);
 
-    void visit(FunctionDeclaration functionDeclaration);
+    T visit(FunctionDeclaration functionDeclaration);
 
-    void visit(Program program);
+    T visit(Program program);
 
-    static void concreteify(Node node, Visitor visitor) {
+    static <T> T concreteify(Node node, Visitor<T> visitor) {
         if (node instanceof Expression) {
-            Visitor.concreteify(node, visitor);
+            return Visitor.concreteify(node, visitor);
         } else if (node instanceof Statement) {
-            Visitor.concreteify(node, visitor);
+            return Visitor.concreteify(node, visitor);
         } else if (node instanceof ArgumentExpressionList) {
-            visitor.visit((ArgumentExpressionList) node);
+            return visitor.visit((ArgumentExpressionList) node);
         } else if (node instanceof DeclarationSpecifierList) {
-            visitor.visit((DeclarationSpecifierList) node);
+            return visitor.visit((DeclarationSpecifierList) node);
         } else if (node instanceof FunctionDeclaration) {
-            visitor.visit((FunctionDeclaration) node);
+            return visitor.visit((FunctionDeclaration) node);
         } else if (node instanceof Program) {
-            visitor.visit((Program) node);
+            return visitor.visit((Program) node);
+        } else {
+            throw new RuntimeException(
+                    "Expression Not Found In ArduinoCodeGenerator visit(Expression expression) Expression: "
+                            + node.getClass().getName());
         }
     }
 
-    static void concreteify(Expression expression, Visitor visitor) {
+    static <T> T concreteify(Expression expression, Visitor<T> visitor) {
         if (expression instanceof BoolLiteral) {
-            visitor.visit((BoolLiteral) expression);
+            return visitor.visit((BoolLiteral) expression);
         } else if (expression instanceof IntLiteral) {
-            visitor.visit((IntLiteral) expression);
+            return visitor.visit((IntLiteral) expression);
         } else if (expression instanceof CharLiteral) {
-            visitor.visit((CharLiteral) expression);
+            return visitor.visit((CharLiteral) expression);
         } else if (expression instanceof AdditivePrefixExpression) {
-            visitor.visit((AdditivePrefixExpression) expression);
+            return visitor.visit((AdditivePrefixExpression) expression);
         } else if (expression instanceof AddressOfExpression) {
-            visitor.visit((AddressOfExpression) expression);
+            return visitor.visit((AddressOfExpression) expression);
         } else if (expression instanceof CastExpression) {
-            visitor.visit((CastExpression) expression);
+            return visitor.visit((CastExpression) expression);
         } else if (expression instanceof FunctionExpression) {
-            visitor.visit((FunctionExpression) expression);
+            return visitor.visit((FunctionExpression) expression);
         } else if (expression instanceof IncrementDecrementExpression) {
-            visitor.visit((IncrementDecrementExpression) expression);
+            return visitor.visit((IncrementDecrementExpression) expression);
         } else if (expression instanceof NegationExpression) {
-            visitor.visit((NegationExpression) expression);
+            return visitor.visit((NegationExpression) expression);
         } else if (expression instanceof AdditiveExpression) {
-            visitor.visit((AdditiveExpression) expression);
+            return visitor.visit((AdditiveExpression) expression);
         } else if (expression instanceof MultiplicativeExpression) {
-            visitor.visit((MultiplicativeExpression) expression);
+            return visitor.visit((MultiplicativeExpression) expression);
         } else if (expression instanceof LogicalRelantionalExpression) {
-            visitor.visit((LogicalRelantionalExpression) expression);
+            return visitor.visit((LogicalRelantionalExpression) expression);
         } else if (expression instanceof LogicalAndExpression) {
-            visitor.visit((LogicalAndExpression) expression);
+            return visitor.visit((LogicalAndExpression) expression);
         } else if (expression instanceof LogicalEqualityExpression) {
-            visitor.visit((LogicalEqualityExpression) expression);
+            return visitor.visit((LogicalEqualityExpression) expression);
         } else if (expression instanceof LogicalOrExpression) {
-            visitor.visit((LogicalOrExpression) expression);
+            return visitor.visit((LogicalOrExpression) expression);
         } else if (expression instanceof AssignmentExpression) {
-            visitor.visit((AssignmentExpression) expression);
+            return visitor.visit((AssignmentExpression) expression);
         } else if (expression instanceof ArrayExpression) {
-            visitor.visit((ArrayExpression) expression);
+            return visitor.visit((ArrayExpression) expression);
         } else if (expression instanceof DereferenceExpression) {
-            visitor.visit((DereferenceExpression) expression);
+            return visitor.visit((DereferenceExpression) expression);
         } else if (expression instanceof VariableExpression) {
-            visitor.visit((VariableExpression) expression);
+            return visitor.visit((VariableExpression) expression);
         } else if (expression instanceof InitializerList) {
-            visitor.visit((InitializerList) expression);
+            return visitor.visit((InitializerList) expression);
         } else {
             throw new RuntimeException(
                     "Expression Not Found In ArduinoCodeGenerator visit(Expression expression) Expression: "
@@ -182,25 +186,25 @@ public interface Visitor {
         }
     }
 
-    static void concreteify(Statement statement, Visitor visitor) {
+    static <T> T concreteify(Statement statement, Visitor<T> visitor) {
         if (statement instanceof BreakStatement) {
-            visitor.visit((BreakStatement) statement);
+            return visitor.visit((BreakStatement) statement);
         } else if (statement instanceof ContinueStatement) {
-            visitor.visit((ContinueStatement) statement);
+            return visitor.visit((ContinueStatement) statement);
         } else if (statement instanceof ReturnStatement) {
-            visitor.visit((ReturnStatement) statement);
+            return visitor.visit((ReturnStatement) statement);
         } else if (statement instanceof IfStatement) {
-            visitor.visit((IfStatement) statement);
+            return visitor.visit((IfStatement) statement);
         } else if (statement instanceof WhileStatement) {
-            visitor.visit((WhileStatement) statement);
+            return visitor.visit((WhileStatement) statement);
         } else if (statement instanceof CompoundStatement) {
-            visitor.visit((CompoundStatement) statement);
+            return visitor.visit((CompoundStatement) statement);
         } else if (statement instanceof ExpressionStatement) {
-            visitor.visit((ExpressionStatement) statement);
+            return visitor.visit((ExpressionStatement) statement);
         } else if (statement instanceof VariableDeclaration) {
-            visitor.visit((VariableDeclaration) statement);
+            return visitor.visit((VariableDeclaration) statement);
         } else if (statement instanceof RawStatement) {
-            visitor.visit((RawStatement) statement);
+            return visitor.visit((RawStatement) statement);
         } else {
             throw new RuntimeException(
                     "Statement Not Found In ArduinoCodeGenerator visit(Statement statement) Statement: "

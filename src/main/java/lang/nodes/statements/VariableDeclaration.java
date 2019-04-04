@@ -31,6 +31,7 @@ public class VariableDeclaration implements Statement, Expression, Identifier, H
   private Expression initializer;
   private boolean param;
   private boolean global = false;
+  private int location;
 
   /**
    * Default constructor
@@ -272,5 +273,13 @@ public class VariableDeclaration implements Statement, Expression, Identifier, H
     this.returnReturnType = returnReturnType;
   }
 
+  @Override
+  public void setLocation(int location) {
+    this.location = location;
+  }
 
+  @Override
+  public int getLocation() {
+    return location;
+  }
 }

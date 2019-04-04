@@ -33,7 +33,7 @@ import lang.nodes.statements.selection.WhileStatement;
 
 import java.util.List;
 
-public class ASTVisitor implements Visitor {
+public class ASTVisitor implements Visitor<Node> {
 
     private SymbolTable global;
 
@@ -47,7 +47,7 @@ public class ASTVisitor implements Visitor {
      * @param program The program to check
      */
     @Override
-    public void visit(Program program) {
+    public Node visit(Program program) {
 
         // We enforce the inclusion of both setup and loop
         Node main = global.lookup("main");
@@ -63,6 +63,8 @@ public class ASTVisitor implements Visitor {
                 visit((VariableDeclaration) node);
             }
         }
+
+        return program;
     }
 
     /**
@@ -71,7 +73,7 @@ public class ASTVisitor implements Visitor {
      * @param funcDef The function definition
      */
     @Override
-    public void visit(FunctionDeclaration funcDef) {
+    public Node visit(FunctionDeclaration funcDef) {
         // Visit all the parameters
         for (VariableDeclaration vd : funcDef) {
             visit(vd);
@@ -82,6 +84,8 @@ public class ASTVisitor implements Visitor {
         ReturnType returnType = determineDeclarationSpecifier(funcDef.getSpecifiers());
 
         checkReturnValidityFunctionDefinition(funcDef.getBody(), returnType);
+
+        return funcDef;
     }
 
     /**
@@ -90,7 +94,7 @@ public class ASTVisitor implements Visitor {
      * @param stm The statement to visit
      */
     @Override
-    public void visit(Statement stm) {
+    public Node visit(Statement stm) {
         if (stm instanceof ExpressionStatement) {
             visit((ExpressionStatement) stm);
         } else if (stm instanceof VariableDeclaration) {
@@ -98,21 +102,26 @@ public class ASTVisitor implements Visitor {
         } else if (stm instanceof IfStatement) {
             visit((IfStatement) stm);
         }
+
+        return stm;
     }
 
     @Override
-    public void visit(BreakStatement breakStatement) {
+    public Node visit(BreakStatement breakStatement) {
         // No type to decorate, hence empty
+        return breakStatement;
     }
 
     @Override
-    public void visit(ContinueStatement continueStatement) {
+    public Node visit(ContinueStatement continueStatement) {
         // No type to decorate, hence empty
+        return continueStatement;
     }
 
     @Override
-    public void visit(ReturnStatement returnStatement) {
+    public Node visit(ReturnStatement returnStatement) {
         // TODO: this
+        return returnStatement;
     }
 
     /**
@@ -121,10 +130,12 @@ public class ASTVisitor implements Visitor {
      * @param cpmStm The compound statement
      */
     @Override
-    public void visit(CompoundStatement cpmStm) {
+    public Node visit(CompoundStatement cpmStm) {
         for (Statement stm : cpmStm) {
             visit(stm);
         }
+
+        return cpmStm;
     }
 
     /**
@@ -133,7 +144,7 @@ public class ASTVisitor implements Visitor {
      * @param stm The if statement to visit
      */
     @Override
-    public void visit(IfStatement stm) {
+    public Node visit(IfStatement stm) {
         Expression condition = stm.getCondition();
 
         visit(stm.getCondition());
@@ -147,10 +158,12 @@ public class ASTVisitor implements Visitor {
             throw new RuntimeException(
                     "The condition was not a boolean expression in " + stm.getClass().getName());
         }
+
+        return stm;
     }
 
     @Override
-    public void visit(WhileStatement whileStatement) {
+    public Node visit(WhileStatement whileStatement) {
         Expression condition = whileStatement.getCondition();
 
         visit(whileStatement.getCondition());
@@ -160,6 +173,8 @@ public class ASTVisitor implements Visitor {
             throw new RuntimeException(
                     "The condition was not a boolean expression in " + whileStatement.getClass().getName());
         }
+
+        return whileStatement;
     }
 
     /**
@@ -168,7 +183,7 @@ public class ASTVisitor implements Visitor {
      * @param exprStm Expression statement
      */
     @Override
-    public void visit(ExpressionStatement exprStm) {
+    public Node visit(ExpressionStatement exprStm) {
         if (exprStm.getExpression() instanceof FunctionExpression) {
             visit((FunctionExpression) exprStm.getExpression());
         } else if (exprStm.getExpression() instanceof BinaryExpression) {
@@ -178,6 +193,8 @@ public class ASTVisitor implements Visitor {
         } else {
             throw new RuntimeException("Expression was not found: " + exprStm.getLiteral());
         }
+
+        return exprStm;
     }
 
     /**
@@ -186,7 +203,7 @@ public class ASTVisitor implements Visitor {
      * @param stm The declaration statement to visit
      */
     @Override
-    public void visit(VariableDeclaration stm) {
+    public Node visit(VariableDeclaration stm) {
         ReturnType returnType = determineDeclarationSpecifier(stm.getSpecifiers());
         stm.setReturnType(returnType);
 
@@ -213,25 +230,26 @@ public class ASTVisitor implements Visitor {
             }*/
 
             // TODO: explain this
-            if (isPrecedenceCorrect(
-                    stm.getReturnType(), stm.getInitializer().getReturnType())) {
-                return;
-            } else {
+            if (!isPrecedenceCorrect(stm.getReturnType(), stm.getInitializer().getReturnType())) {
                 System.out.print("Trying to assign " +
                         stm.getInitializer().getReturnType() + " to " + stm.getReturnType() +
                         ", but this will lose precision.");
             }
         }
+
+        return stm;
     }
 
     @Override
-    public void visit(RawStatement rawStatement) {
+    public Node visit(RawStatement rawStatement) {
         // Ignore this
+        return rawStatement;
     }
 
     @Override
-    public void visit(ArgumentExpressionList expressionList) {
+    public Node visit(ArgumentExpressionList expressionList) {
         // TODO: this
+        return expressionList;
     }
 
 
@@ -241,13 +259,14 @@ public class ASTVisitor implements Visitor {
      * @param specifiers The specifiers to visit
      */
     @Override
-    public void visit(DeclarationSpecifierList specifiers) {
+    public Node visit(DeclarationSpecifierList specifiers) {
         determineDeclarationSpecifier(specifiers);
+        return specifiers;
     }
 
     @Override
-    public void visit(Node node) {
-        Visitor.concreteify(node, this);
+    public Node visit(Node node) {
+        return Visitor.concreteify(node, this);
     }
 
     /**
@@ -256,23 +275,26 @@ public class ASTVisitor implements Visitor {
      * @param expr The expression to visit
      */
     @Override
-    public void visit(Expression expr) {
-        Visitor.concreteify(expr, this);
+    public Node visit(Expression expr) {
+        return Visitor.concreteify(expr, this);
     }
 
     @Override
-    public void visit(BoolLiteral boolLiteral) {
+    public Node visit(BoolLiteral boolLiteral) {
         // Type already assigned, as it's static, thereby this is ignored
+        return boolLiteral;
     }
 
     @Override
-    public void visit(IntLiteral intLiteral) {
+    public Node visit(IntLiteral intLiteral) {
         // Type already assigned, as it's static, thereby this is ignored
+        return intLiteral;
     }
 
     @Override
-    public void visit(CharLiteral charLiteral) {
+    public Node visit(CharLiteral charLiteral) {
         // Type already assigned, as it's static, thereby this is ignored
+        return charLiteral;
     }
 
     /**
@@ -281,27 +303,34 @@ public class ASTVisitor implements Visitor {
      * @param expr The unary expression
      */
     @Override
-    public void visit(UnaryExpression expr) {
+    public Node visit(UnaryExpression expr) {
         if (expr instanceof AddressOfExpression) {
-            visit((AddressOfExpression) expr);
+            return visit((AddressOfExpression) expr);
         } else if (expr instanceof DereferenceExpression) {
-            visit((DereferenceExpression) expr);
+            return visit((DereferenceExpression) expr);
         } else if (expr instanceof NegationExpression) {
-            visit((NegationExpression) expr);
+            return visit((NegationExpression) expr);
         } else if (expr instanceof CastExpression) {
-            visit((CastExpression) expr);
+            return visit((CastExpression) expr);
+        } else if (expr instanceof IncrementDecrementExpression) {
+            visit(expr.getFirstOperand());
+            expr.setReturnType(expr.getFirstOperand().getReturnType());
+            return expr;
         } else if (expr instanceof AdditivePrefixExpression) {
             visit(expr.getFirstOperand());
             expr.setReturnType(expr.getFirstOperand().getReturnType());
+            return expr;
         } else {
             throw new RuntimeException("Unary expression was not found: " + expr.getLiteral());
         }
     }
 
     @Override
-    public void visit(AdditivePrefixExpression expression) {
+    public Node visit(AdditivePrefixExpression expression) {
         visit(expression.getFirstOperand());
         expression.setReturnType(expression.getFirstOperand().getReturnType());
+
+        return expression;
     }
 
     /**
@@ -310,15 +339,15 @@ public class ASTVisitor implements Visitor {
      * @param expr The binary expression
      */
     @Override
-    public void visit(BinaryExpression expr) {
+    public Node visit(BinaryExpression expr) {
         if (expr instanceof ArithmeticExpression) {
-            visit((ArithmeticExpression) expr);
+            return visit((ArithmeticExpression) expr);
         } else if (expr instanceof LogicalExpression) {
-            visit((LogicalExpression) expr);
+            return visit((LogicalExpression) expr);
         } else if (expr instanceof AssignmentExpression) {
-            visit((AssignmentExpression) expr);
+            return visit((AssignmentExpression) expr);
         } else if (expr instanceof ArrayExpression) {
-            visit((ArrayExpression) expr);
+            return visit((ArrayExpression) expr);
         } else {
             throw new RuntimeException(
                     "Binary expression was not found: " + expr.getLiteral());
@@ -326,33 +355,35 @@ public class ASTVisitor implements Visitor {
     }
 
     @Override
-    public void visit(AdditiveExpression additiveExpression) {
-        visit((ArithmeticExpression) additiveExpression);
+    public Node visit(AdditiveExpression additiveExpression) {
+        return visit((ArithmeticExpression) additiveExpression);
     }
 
     @Override
-    public void visit(MultiplicativeExpression multiplicativeExpression) {
-        visit((ArithmeticExpression) multiplicativeExpression);
+    public Node visit(MultiplicativeExpression multiplicativeExpression) {
+        return visit((ArithmeticExpression) multiplicativeExpression);
     }
 
     @Override
-    public void visit(LogicalRelantionalExpression logicalRelantionalExpression) {
+    public Node visit(LogicalRelantionalExpression logicalRelantionalExpression) {
         // TODO: this
+        return logicalRelantionalExpression;
     }
 
     @Override
-    public void visit(LogicalAndExpression logicalAndExpression) {
-        visit((LogicalExpression) logicalAndExpression);
+    public Node visit(LogicalAndExpression logicalAndExpression) {
+        return visit((LogicalExpression) logicalAndExpression);
     }
 
     @Override
-    public void visit(LogicalEqualityExpression logicalEqualityExpression) {
+    public Node visit(LogicalEqualityExpression logicalEqualityExpression) {
         // TODO: this
+        return logicalEqualityExpression;
     }
 
     @Override
-    public void visit(LogicalOrExpression logicalOrExpression) {
-        visit((LogicalExpression) logicalOrExpression);
+    public Node visit(LogicalOrExpression logicalOrExpression) {
+        return visit((LogicalExpression) logicalOrExpression);
     }
 
     /**
@@ -361,9 +392,11 @@ public class ASTVisitor implements Visitor {
      * @param expr The negation expression
      */
     @Override
-    public void visit(NegationExpression expr) {
+    public Node visit(NegationExpression expr) {
         expr.visit(this);
         determineIfValidType(expr.getFirstOperand(), Types.BOOL);
+
+        return expr;
     }
 
     /**
@@ -372,9 +405,9 @@ public class ASTVisitor implements Visitor {
      * @param expr The function call
      */
     @Override
-    public void visit(FunctionExpression expr) {
-        String FuncID = expr.getIdentifier();
-        FunctionDeclaration funcDef = (FunctionDeclaration) global.lookup(FuncID);
+    public Node visit(FunctionExpression expr) {
+        String funcId = expr.getIdentifier();
+        FunctionDeclaration funcDef = (FunctionDeclaration) global.lookup(funcId);
 
         // check if function is declared
         if (funcDef == null) {
@@ -400,11 +433,13 @@ public class ASTVisitor implements Visitor {
             visit(parameter);
             throwIfInvalidDeclaration(declarationReturnType, parameter);
         }
+
+        return expr;
     }
 
     @Override
-    public void visit(IncrementDecrementExpression expression) {
-
+    public Node visit(IncrementDecrementExpression expression) {
+        return expression;
     }
 
     /**
@@ -413,7 +448,7 @@ public class ASTVisitor implements Visitor {
      * @param expr The array expression
      */
     @Override
-    public void visit(ArrayExpression expr) {
+    public Node visit(ArrayExpression expr) {
         visit(expr.getFirstOperand());
         visit(expr.getSecondOperand());
 
@@ -421,6 +456,8 @@ public class ASTVisitor implements Visitor {
         determineIfValidType(expr.getSecondOperand(), Types.INT, Types.CHAR);
 
         expr.setReturnType(expr.getFirstOperand().getReturnType());
+
+        return expr;
     }
 
     /**
@@ -429,9 +466,11 @@ public class ASTVisitor implements Visitor {
      * @param expr The address of expression
      */
     @Override
-    public void visit(AddressOfExpression expr) {
+    public Node visit(AddressOfExpression expr) {
         expr.visit(this);
         expr.setReturnType(expr.getFirstOperand().getReturnType());
+
+        return expr;
     }
 
     /**
@@ -440,9 +479,11 @@ public class ASTVisitor implements Visitor {
      * @param expr The dereference expression
      */
     @Override
-    public void visit(DereferenceExpression expr) {
+    public Node visit(DereferenceExpression expr) {
         expr.visit(this);
         expr.setReturnType(expr.getFirstOperand().getReturnType());
+
+        return expr;
     }
 
     /**
@@ -451,7 +492,7 @@ public class ASTVisitor implements Visitor {
      * @param expr Assignment expression
      */
     @Override
-    public void visit(AssignmentExpression expr) {
+    public Node visit(AssignmentExpression expr) {
         expr.visit(this);
 
         ReturnType returnType = throwIfInvalidDeclaration(
@@ -459,6 +500,8 @@ public class ASTVisitor implements Visitor {
         );
 
         expr.setReturnType(returnType);
+
+        return expr;
     }
 
     /**
@@ -466,7 +509,7 @@ public class ASTVisitor implements Visitor {
      *
      * @param expr Logical binary expression
      */
-    public void visit(LogicalExpression expr) {
+    public Node visit(LogicalExpression expr) {
         expr.visit(this);
 
         Node firstReturnType = expr.getFirstOperand();
@@ -479,6 +522,8 @@ public class ASTVisitor implements Visitor {
         } else {
             determineArithmeticReturnType(firstReturnType, secondReturnType);
         }
+
+        return expr;
     }
 
     /**
@@ -486,13 +531,14 @@ public class ASTVisitor implements Visitor {
      *
      * @param expr The arithmetic binary expression
      */
-    public void visit(ArithmeticExpression expr) {
+    public Node visit(ArithmeticExpression expr) {
         expr.visit(this);
 
         expr.setReturnType(determineArithmeticReturnType(
                 expr.getFirstOperand(), expr.getSecondOperand())
         );
 
+        return expr;
     }
 
     /**
@@ -501,8 +547,10 @@ public class ASTVisitor implements Visitor {
      * @param expr The variable expression
      */
     @Override
-    public void visit(VariableExpression expr) {
+    public Node visit(VariableExpression expr) {
         expr.setReturnType(expr.getDefinition().getReturnType());
+
+        return expr;
     }
 
     /**
@@ -511,7 +559,7 @@ public class ASTVisitor implements Visitor {
      * @param expr The initializer list
      */
     @Override
-    public void visit(InitializerList expr) {
+    public Node visit(InitializerList expr) {
         ReturnType ty = null;
 
         if (expr.size() > 0) {
@@ -523,6 +571,7 @@ public class ASTVisitor implements Visitor {
         }
 
         expr.setReturnType(ty);
+        return expr;
     }
 
     /**
@@ -531,7 +580,7 @@ public class ASTVisitor implements Visitor {
      * @param expr The cast expression
      */
     @Override
-    public void visit(CastExpression expr) {
+    public Node visit(CastExpression expr) {
         ReturnType specifierReturnType = determineDeclarationSpecifier(expr.getSpecifiers());
 
         if (specifierReturnType.type == Types.BOOL) {
@@ -541,6 +590,8 @@ public class ASTVisitor implements Visitor {
         }
 
         expr.setReturnType(specifierReturnType);
+
+        return expr;
     }
 
     /**

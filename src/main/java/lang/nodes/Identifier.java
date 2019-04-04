@@ -21,4 +21,8 @@ public interface Identifier extends Node {
      */
     void setIdentifier(String identifier);
 
+
+    void setLocation(int location);
+
+    int getLocation();
 }
